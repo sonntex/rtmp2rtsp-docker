@@ -373,26 +373,6 @@ RUN cd /tmp \
     && rm -rf gst-plugins-bad-${GST_VER}
 
 RUN cd /tmp \
-    && wget -O gst-rtsp-server-${GST_VER}.tar.xz \
-        https://gstreamer.freedesktop.org/src/gst-rtsp-server/gst-rtsp-server-${GST_VER}.tar.xz \
-    && tar xvf gst-rtsp-server-${GST_VER}.tar.xz \
-    && cd gst-rtsp-server-${GST_VER} \
-    && ./configure \
-        --prefix=/usr \
-        --disable-static \
-        --disable-gtk-doc \
-        --disable-gtk-doc-html \
-        --disable-gtk-doc-pdf \
-        --disable-dependency-tracking \
-        --disable-examples \
-        --disable-valgrind \
-        --disable-debug \
-    && make && make install \
-    && cd - \
-    && rm -rf gst-rtsp-server-${GST_VER}.tar.xz \
-    && rm -rf gst-rtsp-server-${GST_VER}
-
-RUN cd /tmp \
     && wget -O nginx-${NGX_VER}.tar.gz \
         https://nginx.org/download/nginx-${NGX_VER}.tar.gz \
     && tar xvf nginx-${NGX_VER}.tar.gz \
@@ -411,6 +391,26 @@ RUN cd /tmp \
     && cd - \
     && rm -rf nginx-${NGX_VER}.tar.gz \
     && rm -rf nginx-${NGX_VER}
+
+RUN apk --no-cache add libtool gtk-doc
+
+RUN cd /tmp \
+    && git clone https://github.com/sonntex/gst-rtsp-server.git \
+    && cd gst-rtsp-server \
+    && ./autogen.sh \
+    && ./configure \
+        --prefix=/usr \
+        --disable-static \
+        --disable-gtk-doc \
+        --disable-gtk-doc-html \
+        --disable-gtk-doc-pdf \
+        --disable-dependency-tracking \
+        --disable-examples \
+        --disable-valgrind \
+        --disable-debug \
+    && make && make install \
+    && cd - \
+    && rm -rf gst-rtsp-server
 
 RUN cd /tmp \
     && git clone https://github.com/sonntex/rtmp2rtsp.git \
