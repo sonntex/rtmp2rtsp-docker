@@ -3,8 +3,6 @@ FROM alpine
 MAINTAINER Nikolay Beloborodov <sonntex@gmail.com>
 
 ENV GST_VER 1.12.3
-ENV NGX_VER 1.13.6
-ENV NGX_RTMP_MODULE_VER 1.2.0
 
 RUN apk --no-cache update && apk --no-cache add bash
 
@@ -18,16 +16,13 @@ RUN apk --no-cache add --virtual .build-deps \
         python \
         wget \
         git \
+        libtool \
         glib-dev \
-        orc-dev \
-        rtmpdump-dev \
-        libressl-dev
+        orc-dev
 
 RUN apk --no-cache add \
         glib \
-        orc \
-        rtmpdump \
-        libressl
+        orc
 
 RUN cd /tmp \
     && wget -O gstreamer-${GST_VER}.tar.xz \
@@ -373,31 +368,10 @@ RUN cd /tmp \
     && rm -rf gst-plugins-bad-${GST_VER}
 
 RUN cd /tmp \
-    && wget -O nginx-${NGX_VER}.tar.gz \
-        https://nginx.org/download/nginx-${NGX_VER}.tar.gz \
-    && tar xvf nginx-${NGX_VER}.tar.gz \
-    && wget -O nginx-rtmp-module-${NGX_RTMP_MODULE_VER}.tar.gz \
-        https://github.com/arut/nginx-rtmp-module/archive/v${NGX_RTMP_MODULE_VER}.tar.gz \
-    && tar xvf nginx-rtmp-module-${NGX_RTMP_MODULE_VER}.tar.gz \
-    && cd nginx-${NGX_VER} \
-    && ./configure \
-        --prefix=/usr \
-        --http-log-path=/dev/stdout \
-        --error-log-path=/dev/stderr \
-        --with-threads \
-        --with-http_ssl_module \
-        --add-module=../nginx-rtmp-module-${NGX_RTMP_MODULE_VER} \
-    && make && make install \
-    && cd - \
-    && rm -rf nginx-${NGX_VER}.tar.gz \
-    && rm -rf nginx-${NGX_VER}
-
-RUN apk --no-cache add libtool gtk-doc
-
-RUN cd /tmp \
-    && git clone https://github.com/sonntex/gst-rtsp-server.git \
-    && cd gst-rtsp-server \
-    && ./autogen.sh \
+    && wget -O gst-rtsp-server-${GST_VER}.tar.xz \
+        https://gstreamer.freedesktop.org/src/gst-rtsp-server/gst-rtsp-server-${GST_VER}.tar.xz \
+    && tar xvf gst-rtsp-server-${GST_VER}.tar.xz \
+    && cd gst-rtsp-server-${GST_VER} \
     && ./configure \
         --prefix=/usr \
         --disable-static \
@@ -410,7 +384,22 @@ RUN cd /tmp \
         --disable-debug \
     && make && make install \
     && cd - \
-    && rm -rf gst-rtsp-server
+    && rm -rf gst-rtsp-server-${GST_VER}.tar.xz \
+    && rm -rf gst-rtsp-server-${GST_VER}
+
+RUN apk --no-cache del .build-deps
+
+FROM alpine
+
+RUN apk --no-cache add --virtual .build-deps \
+        build-base \
+        cmake \
+        git \
+        glib-dev
+
+RUN apk --no-cache add \
+        glib \
+        orc
 
 RUN cd /tmp \
     && git clone https://github.com/sonntex/rtmp2rtsp.git \
@@ -422,9 +411,6 @@ RUN cd /tmp \
 
 RUN apk --no-cache del .build-deps
 
-COPY nginx.conf /usr/conf/nginx.conf
-
-# EXPOSE 1935
 # EXPOSE 8554
 
-# RUN nginx && rtmp2rtsp 0.0.0.0 8554
+# RUN nginx && RTMP_HOST=127.0.0.1 RTMP_PORT=1935 RTSP_HOST=0.0.0.0 RTSP_PORT=8554 rtmp2rtsp
