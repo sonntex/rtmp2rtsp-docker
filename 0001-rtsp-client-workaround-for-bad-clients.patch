@@ -1,0 +1,56 @@
+From 4f5d48ce47705c3ffe1d135f74ec6a7dacb22b63 Mon Sep 17 00:00:00 2001
+From: sonntex <sonntex@gmail.com>
+Date: Wed, 22 Nov 2017 17:44:37 +0300
+Subject: [PATCH] rtsp-client: workaround for bad clients
+
+---
+ gst/rtsp-server/rtsp-client.c | 19 +++++++++++++++++++
+ gst/rtsp-server/rtsp-media.c  |  2 +-
+ 2 files changed, 20 insertions(+), 1 deletion(-)
+
+diff --git a/gst/rtsp-server/rtsp-client.c b/gst/rtsp-server/rtsp-client.c
+index cf78b17..a40fed5 100644
+--- a/gst/rtsp-server/rtsp-client.c
++++ b/gst/rtsp-server/rtsp-client.c
+@@ -1547,6 +1547,25 @@ handle_play_request (GstRTSPClient * client, GstRTSPContext * ctx)
+     if (gst_rtsp_range_parse (str, &range) == GST_RTSP_OK) {
+       GstRTSPMediaStatus media_status;
+ 
++      if (range->min.type == GST_RTSP_TIME_SECONDS &&
++          range->min.seconds == 0 &&
++          range->max.type == GST_RTSP_TIME_END &&
++          range->max.seconds == 0) {
++
++        GST_WARNING ("fix range old %d, %f - %d, %f",
++            range->min.type, range->min.seconds,
++            range->max.type, range->max.seconds);
++
++        range->min.type = GST_RTSP_TIME_NOW;
++        range->min.seconds = -1;
++        range->max.type = GST_RTSP_TIME_END;
++        range->max.seconds = -1;
++
++        GST_WARNING ("fix range new %d, %f - %d, %f",
++            range->min.type, range->min.seconds,
++            range->max.type, range->max.seconds);
++      }
++
+       /* we have a range, seek to the position */
+       unit = range->unit;
+       gst_rtsp_media_seek (media, range);
+diff --git a/gst/rtsp-server/rtsp-media.c b/gst/rtsp-server/rtsp-media.c
+index 996f453..34b684b 100644
+--- a/gst/rtsp-server/rtsp-media.c
++++ b/gst/rtsp-server/rtsp-media.c
+@@ -2952,7 +2952,7 @@ gst_rtsp_media_prepare (GstRTSPMedia * media, GstRTSPThread * thread)
+   GST_INFO ("preparing media %p", media);
+ 
+   /* reset some variables */
+-  priv->is_live = FALSE;
++  priv->is_live = TRUE;
+   priv->seekable = FALSE;
+   priv->buffering = FALSE;
+ 
+-- 
+2.15.0
+
