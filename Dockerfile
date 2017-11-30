@@ -4,9 +4,7 @@ MAINTAINER Nikolay Beloborodov <sonntex@gmail.com>
 
 ENV GST_VER 1.12.3
 
-RUN apt-get update && apt-get install -y bash
-
-RUN apt-get install -y \
+RUN apt-get update && apt-get install -y \
         build-essential \
         autoconf \
         automake \
@@ -402,4 +400,4 @@ ENV RTMP_HOST=172.17.0.1 \
 
 EXPOSE ${RTSP_PORT}
 
-CMD rtmp2rtsp
+CMD while true; do rtmp2rtsp; test $? -eq 0 && break; done
