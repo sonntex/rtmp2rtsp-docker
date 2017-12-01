@@ -400,4 +400,6 @@ ENV RTMP_HOST=172.17.0.1 \
 
 EXPOSE ${RTSP_PORT}
 
+ENV GST_DEBUG=3
+
 CMD while true; do rtmp2rtsp; test $? -eq 0 && break; done
