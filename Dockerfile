@@ -16,7 +16,9 @@ RUN apt-get update && apt-get install -y \
         git \
         librtmp-dev \
         liborc-dev \
-        libglib2.0-dev
+        libglib2.0-dev \
+        libjson-glib-dev \
+        libsoup2.4-dev
 
 RUN cd /tmp \
     && wget -O gstreamer-${GST_VER}.tar.xz \
