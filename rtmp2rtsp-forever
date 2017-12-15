@@ -1,0 +1,12 @@
+#!/bin/sh
+
+while true; do
+    rtmp2rtsp \
+        --rtmp-host=$RTMP_HOST \
+        --rtmp-port=$RTMP_PORT \
+        --rtsp-host=$RTSP_HOST \
+        --rtsp-port=$RTSP_PORT \
+        --http-host=$HTTP_HOST \
+        --http-port=$HTTP_PORT
+    test $? -eq 0 && break
+done

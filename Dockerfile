@@ -398,10 +398,14 @@ RUN cd /tmp \
 ENV RTMP_HOST=172.17.0.1 \
     RTMP_PORT=1935 \
     RTSP_HOST=0.0.0.0 \
-    RTSP_PORT=8554
+    RTSP_PORT=8554 \
+    HTTP_HOST=0.0.0.0 \
+    HTTP_PORT=8080
 
-EXPOSE ${RTSP_PORT}
+EXPOSE ${RTSP_PORT} ${HTTP_PORT}
+
+COPY rtmp2rtsp-forever /usr/bin/rtmp2rtsp-forever
 
 ENV GST_DEBUG=3
 
-CMD while true; do rtmp2rtsp; test $? -eq 0 && break; done
+CMD rtmp2rtsp-forever
