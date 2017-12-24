@@ -365,6 +365,8 @@ RUN cd /tmp \
 
 COPY 0001-rtsp-client-workaround-for-bad-clients.patch \
         /tmp/gst-rtsp-server-${GST_VER}/0001-rtsp-client-workaround-for-bad-clients.patch
+COPY 0002-rtsp-stream-add-function-that-returns-separated-stri.patch \
+        /tmp/gst-rtsp-server-${GST_VER}/0002-rtsp-stream-add-function-that-returns-separated-stri.patch
 
 RUN cd /tmp \
     && wget -O gst-rtsp-server-${GST_VER}.tar.xz \
@@ -372,6 +374,7 @@ RUN cd /tmp \
     && tar xvf gst-rtsp-server-${GST_VER}.tar.xz \
     && cd gst-rtsp-server-${GST_VER} \
     && patch -p1 < 0001-rtsp-client-workaround-for-bad-clients.patch \
+    && patch -p1 < 0002-rtsp-stream-add-function-that-returns-separated-stri.patch \
     && ./configure \
         --prefix=/usr \
         --disable-static \
@@ -400,9 +403,11 @@ ENV RTMP_HOST=172.17.0.1 \
     RTSP_HOST=0.0.0.0 \
     RTSP_PORT=8554 \
     HTTP_HOST=0.0.0.0 \
-    HTTP_PORT=8080
+    HTTP_PORT=8080 \
+    PROMETHEUS_HOST=0.0.0.0 \
+    PROMETHEUS_PORT=8081
 
-EXPOSE ${RTSP_PORT} ${HTTP_PORT}
+EXPOSE ${RTSP_PORT} ${HTTP_PORT} ${PROMETHEUS_PORT}
 
 COPY rtmp2rtsp-forever /usr/bin/rtmp2rtsp-forever
 

@@ -7,6 +7,9 @@ while true; do
         --rtsp-host=$RTSP_HOST \
         --rtsp-port=$RTSP_PORT \
         --http-host=$HTTP_HOST \
-        --http-port=$HTTP_PORT
+        --http-port=$HTTP_PORT \
+        --prometheus-host=$PROMETHEUS_HOST \
+        --prometheus-port=$PROMETHEUS_PORT
     test $? -eq 0 && break
+    sleep 0.5
 done
