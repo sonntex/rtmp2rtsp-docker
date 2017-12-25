@@ -377,7 +377,7 @@ RUN cd /tmp \
     && rm -rf gst-plugins-bad-${GST_VER}
 
 COPY 0001-rtsp-client-workaround-for-bad-clients.patch /tmp
-COPY 0002-rtsp-stream-add-function-that-returns-separated-stri.patch /tmp
+COPY 0002-rtsp-stream-add-some-getters-for-multiudpsink.patch /tmp
 
 RUN cd /tmp \
     && wget -O gst-rtsp-server-${GST_VER}.tar.xz \
@@ -385,7 +385,7 @@ RUN cd /tmp \
     && tar xvf gst-rtsp-server-${GST_VER}.tar.xz \
     && cd gst-rtsp-server-${GST_VER} \
     && patch -p1 < /tmp/0001-rtsp-client-workaround-for-bad-clients.patch \
-    && patch -p1 < /tmp/0002-rtsp-stream-add-function-that-returns-separated-stri.patch \
+    && patch -p1 < /tmp/0002-rtsp-stream-add-some-getters-for-multiudpsink.patch \
     && ./configure \
         --prefix=/usr \
         --disable-static \
