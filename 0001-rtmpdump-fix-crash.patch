@@ -1,0 +1,30 @@
+From b22772c5a2d259cd12c6f5901b8d4ec1e29d1c6e Mon Sep 17 00:00:00 2001
+From: sonntex <sonntex@gmail.com>
+Date: Mon, 25 Dec 2017 17:21:47 +0300
+Subject: [PATCH] rtmpdump: fix crash
+
+---
+ librtmp/rtmp.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/librtmp/rtmp.c b/librtmp/rtmp.c
+index a2863b0..be37929 100644
+--- a/librtmp/rtmp.c
++++ b/librtmp/rtmp.c
+@@ -3708,6 +3708,13 @@ RTMP_ReadPacket(RTMP *r, RTMPPacket *packet)
+ 
+   packet->m_nBytesRead += nChunk;
+ 
++  if (!r->m_vecChannelsIn)
++    {
++      RTMP_Log(RTMP_LOGERROR, "%s, ooops!",
++	  __FUNCTION__);
++      return FALSE;
++    }
++
+   /* keep the packet as ref for other packets on this channel */
+   if (!r->m_vecChannelsIn[packet->m_nChannel])
+     r->m_vecChannelsIn[packet->m_nChannel] = malloc(sizeof(RTMPPacket));
+-- 
+2.15.0
+

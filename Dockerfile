@@ -14,11 +14,24 @@ RUN apt-get update && apt-get install -y \
         python \
         wget \
         git \
-        librtmp-dev \
+        libgnutls-dev \
         liborc-dev \
         libglib2.0-dev \
         libjson-glib-dev \
         libsoup2.4-dev
+
+COPY 0001-rtmpdump-fix-crash.patch /tmp
+
+RUN cd /tmp \
+    && git clone https://git.ffmpeg.org/rtmpdump \
+    && cd rtmpdump \
+    && git reset --hard fa8646d \
+    && patch -p1 < /tmp/0001-rtmpdump-fix-crash.patch \
+    && sed -e 's/#CRYPTO=GNUTLS/CRYPTO=GNUTLS/' -i Makefile -i librtmp/Makefile \
+    && make OPT="-O2" && make install \
+    && cd - \
+    && rm -rf rtmpdump \
+    && rm -rf *patch
 
 RUN cd /tmp \
     && wget -O gstreamer-${GST_VER}.tar.xz \
@@ -363,18 +376,16 @@ RUN cd /tmp \
     && rm -rf gst-plugins-bad-${GST_VER}.tar.xz \
     && rm -rf gst-plugins-bad-${GST_VER}
 
-COPY 0001-rtsp-client-workaround-for-bad-clients.patch \
-        /tmp/gst-rtsp-server-${GST_VER}/0001-rtsp-client-workaround-for-bad-clients.patch
-COPY 0002-rtsp-stream-add-function-that-returns-separated-stri.patch \
-        /tmp/gst-rtsp-server-${GST_VER}/0002-rtsp-stream-add-function-that-returns-separated-stri.patch
+COPY 0001-rtsp-client-workaround-for-bad-clients.patch /tmp
+COPY 0002-rtsp-stream-add-function-that-returns-separated-stri.patch /tmp
 
 RUN cd /tmp \
     && wget -O gst-rtsp-server-${GST_VER}.tar.xz \
         https://gstreamer.freedesktop.org/src/gst-rtsp-server/gst-rtsp-server-${GST_VER}.tar.xz \
     && tar xvf gst-rtsp-server-${GST_VER}.tar.xz \
     && cd gst-rtsp-server-${GST_VER} \
-    && patch -p1 < 0001-rtsp-client-workaround-for-bad-clients.patch \
-    && patch -p1 < 0002-rtsp-stream-add-function-that-returns-separated-stri.patch \
+    && patch -p1 < /tmp/0001-rtsp-client-workaround-for-bad-clients.patch \
+    && patch -p1 < /tmp/0002-rtsp-stream-add-function-that-returns-separated-stri.patch \
     && ./configure \
         --prefix=/usr \
         --disable-static \
@@ -388,7 +399,8 @@ RUN cd /tmp \
     && make && make install \
     && cd - \
     && rm -rf gst-rtsp-server-${GST_VER}.tar.xz \
-    && rm -rf gst-rtsp-server-${GST_VER}
+    && rm -rf gst-rtsp-server-${GST_VER} \
+    && rm -rf *patch
 
 RUN cd /tmp \
     && git clone https://github.com/sonntex/rtmp2rtsp.git \
