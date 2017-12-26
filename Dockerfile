@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y \
         python \
         wget \
         git \
+        gdb \
         libgnutls-dev \
         liborc-dev \
         libglib2.0-dev \
@@ -29,10 +30,9 @@ RUN cd /tmp \
     && patch -p1 < ../0001-rtmpdump-fix-crash.patch \
     && rm ../*.patch \
     && sed -e 's/#CRYPTO=GNUTLS/CRYPTO=GNUTLS/' -i Makefile -i librtmp/Makefile \
-    && make OPT="-O2" \
+    && make OPT="-Og -g -ggdb" \
     && make prefix=/usr install \
-    && cd - \
-    && rm -rf rtmpdump
+    && cd -
 
 RUN rm /usr/lib/x86_64-linux-gnu/librtmp.so.1
 
@@ -54,11 +54,10 @@ RUN cd /tmp \
         --disable-check \
         --disable-examples \
         --disable-valgrind \
-        --disable-debug \
+        --enable-debug \
     && make && make install \
     && cd - \
-    && rm -rf gstreamer-${GST_VER}.tar.xz \
-    && rm -rf gstreamer-${GST_VER}
+    && rm -rf gstreamer-${GST_VER}.tar.xz
 
 RUN cd /tmp \
     && wget -O gst-plugins-base-${GST_VER}.tar.xz \
@@ -74,7 +73,7 @@ RUN cd /tmp \
         --disable-dependency-tracking \
         --disable-examples \
         --disable-valgrind \
-        --disable-debug \
+        --enable-debug \
         --disable-adder \
         --enable-app \
         --disable-audioconvert \
@@ -109,8 +108,7 @@ RUN cd /tmp \
         --disable-vorbis \
     && make && make install \
     && cd - \
-    && rm -rf gst-plugins-base-${GST_VER}.tar.xz \
-    && rm -rf gst-plugins-base-${GST_VER}
+    && rm -rf gst-plugins-base-${GST_VER}.tar.xz
 
 RUN cd /tmp \
     && wget -O gst-plugins-good-${GST_VER}.tar.xz \
@@ -126,7 +124,7 @@ RUN cd /tmp \
         --disable-dependency-tracking \
         --disable-examples \
         --disable-valgrind \
-        --disable-debug \
+        --enable-debug \
         --disable-alpha \
         --disable-apetag \
         --disable-audiofx \
@@ -202,8 +200,7 @@ RUN cd /tmp \
         --disable-bz2 \
     && make && make install \
     && cd - \
-    && rm -rf gst-plugins-good-${GST_VER}.tar.xz \
-    && rm -rf gst-plugins-good-${GST_VER}
+    && rm -rf gst-plugins-good-${GST_VER}.tar.xz
 
 RUN cd /tmp \
     && wget -O gst-plugins-bad-${GST_VER}.tar.xz \
@@ -219,7 +216,7 @@ RUN cd /tmp \
         --disable-dependency-tracking \
         --disable-examples \
         --disable-valgrind \
-        --disable-debug \
+        --enable-debug \
         --disable-accurip \
         --disable-adpcmdec \
         --disable-adpcmenc \
@@ -376,8 +373,7 @@ RUN cd /tmp \
         --disable-webrtcdsp \
     && make && make install \
     && cd - \
-    && rm -rf gst-plugins-bad-${GST_VER}.tar.xz \
-    && rm -rf gst-plugins-bad-${GST_VER}
+    && rm -rf gst-plugins-bad-${GST_VER}.tar.xz
 
 COPY 0001-rtsp-client-workaround-for-bad-clients.patch /tmp
 COPY 0002-rtsp-stream-add-some-getters-for-multiudpsink.patch /tmp
@@ -399,20 +395,18 @@ RUN cd /tmp \
         --disable-dependency-tracking \
         --disable-examples \
         --disable-valgrind \
-        --disable-debug \
+        --enable-debug \
     && make && make install \
     && cd - \
-    && rm -rf gst-rtsp-server-${GST_VER}.tar.xz \
-    && rm -rf gst-rtsp-server-${GST_VER}
+    && rm -rf gst-rtsp-server-${GST_VER}.tar.xz
 
 RUN cd /tmp \
     && git clone https://github.com/sonntex/rtmp2rtsp.git \
     && cd rtmp2rtsp \
     && git reset --hard c3c2f82 \
-    && cmake -DCMAKE_INSTALL_PREFIX=/usr \
+    && cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Debug \
     && make && make install \
-    && cd - \
-    && rm -rf rtmp2rtsp
+    && cd -
 
 ENV RTMP_HOST=172.17.0.1 \
     RTMP_PORT=1935 \
