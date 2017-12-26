@@ -26,12 +26,15 @@ RUN cd /tmp \
     && git clone https://git.ffmpeg.org/rtmpdump \
     && cd rtmpdump \
     && git reset --hard fa8646d \
-    && patch -p1 < /tmp/0001-rtmpdump-fix-crash.patch \
+    && patch -p1 < ../0001-rtmpdump-fix-crash.patch \
+    && rm ../*.patch \
     && sed -e 's/#CRYPTO=GNUTLS/CRYPTO=GNUTLS/' -i Makefile -i librtmp/Makefile \
-    && make OPT="-O2" && make install \
+    && make OPT="-O2" \
+    && make prefix=/usr install \
     && cd - \
-    && rm -rf rtmpdump \
-    && rm -rf *patch
+    && rm -rf rtmpdump
+
+RUN rm /usr/lib/x86_64-linux-gnu/librtmp.so.1
 
 RUN cd /tmp \
     && wget -O gstreamer-${GST_VER}.tar.xz \
@@ -384,8 +387,9 @@ RUN cd /tmp \
         https://gstreamer.freedesktop.org/src/gst-rtsp-server/gst-rtsp-server-${GST_VER}.tar.xz \
     && tar xvf gst-rtsp-server-${GST_VER}.tar.xz \
     && cd gst-rtsp-server-${GST_VER} \
-    && patch -p1 < /tmp/0001-rtsp-client-workaround-for-bad-clients.patch \
-    && patch -p1 < /tmp/0002-rtsp-stream-add-some-getters-for-multiudpsink.patch \
+    && patch -p1 < ../0001-rtsp-client-workaround-for-bad-clients.patch \
+    && patch -p1 < ../0002-rtsp-stream-add-some-getters-for-multiudpsink.patch \
+    && rm ../*patch \
     && ./configure \
         --prefix=/usr \
         --disable-static \
@@ -399,8 +403,7 @@ RUN cd /tmp \
     && make && make install \
     && cd - \
     && rm -rf gst-rtsp-server-${GST_VER}.tar.xz \
-    && rm -rf gst-rtsp-server-${GST_VER} \
-    && rm -rf *patch
+    && rm -rf gst-rtsp-server-${GST_VER}
 
 RUN cd /tmp \
     && git clone https://github.com/sonntex/rtmp2rtsp.git \
@@ -422,7 +425,5 @@ ENV RTMP_HOST=172.17.0.1 \
 EXPOSE ${RTSP_PORT} ${HTTP_PORT} ${PROMETHEUS_PORT}
 
 COPY rtmp2rtsp-forever /usr/bin/rtmp2rtsp-forever
-
-ENV GST_DEBUG=3
 
 CMD rtmp2rtsp-forever
