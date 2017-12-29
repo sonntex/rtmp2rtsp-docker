@@ -408,7 +408,7 @@ RUN cd /tmp \
 RUN cd /tmp \
     && git clone https://github.com/sonntex/rtmp2rtsp.git \
     && cd rtmp2rtsp \
-    && git reset --hard b1de720 \
+    && git reset --hard c3c2f82 \
     && cmake -DCMAKE_INSTALL_PREFIX=/usr \
     && make && make install \
     && cd - \
