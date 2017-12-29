@@ -4,8 +4,10 @@ while true; do
     rtmp2rtsp \
         --rtmp-host=$RTMP_HOST \
         --rtmp-port=$RTMP_PORT \
+        --rtmp-timeout=$RTMP_TIMEOUT \
         --rtsp-host=$RTSP_HOST \
         --rtsp-port=$RTSP_PORT \
+        --rtsp-timeout=$RTSP_TIMEOUT \
         --http-host=$HTTP_HOST \
         --http-port=$HTTP_PORT \
         --prometheus-host=$PROMETHEUS_HOST \
